@@ -117,32 +117,6 @@ Karpenter provisioner configuration wasn't optimized for GPU workloads.
 2. Added proper taints and tolerations to ensure GPU workloads land on GPU nodes
 3. Configured proper scaling settings to reduce provisioning time
 
-## Best Practices Learned
-
-1. **Resource Dependencies**
-   - Always explicitly define resource dependencies in Terraform
-   - Use `depends_on` for resources that need specific ordering
-   - Consider using data sources for dynamic configurations
-
-2. **Configuration Management**
-   - Keep configurations simple and standardized
-   - Use version pinning for all components
-   - Document all configuration options and their impacts
-
-3. **Testing and Validation**
-   - Create test workloads to validate GPU functionality
-   - Monitor resource utilization during testing
-   - Validate time-slicing functionality with multiple pods
-
-4. **Monitoring and Debugging**
-   - Set up proper logging for GPU components
-   - Monitor GPU utilization and allocation
-   - Keep track of pod scheduling events
-
-5. **Cost Optimization**
-   - Use spot instances where possible
-   - Implement proper node draining
-   - Monitor GPU utilization to adjust time-slicing settings
 
 ## Future Improvements
 
