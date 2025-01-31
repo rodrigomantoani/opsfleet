@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapUsers: |
+    - userarn: arn:aws:iam::559050207966:user/paygw
+      username: admin
+      groups:
+        - system:masters
+  mapRoles: |
+    - rolearn: arn:aws:iam::559050207966:role/karpenter-node-karpenter-test
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+    - rolearn: ${aws_iam_role.karpenter_node.arn}
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes

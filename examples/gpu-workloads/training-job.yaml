@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pytorch-training
+spec:
+  template:
+    spec:
+      runtimeClassName: nvidia
+      containers:
+      - name: pytorch
+        image: pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
+        command:
+        - "python"
+        - "-c"
+        - |
+          import torch
+          print(f"PyTorch version: {torch.__version__}")
+          print(f"CUDA available: {torch.cuda.is_available()}")
+          if torch.cuda.is_available():
+              print(f"CUDA device: {torch.cuda.get_device_name(0)}")
+              # Simple GPU operation to verify functionality
+              x = torch.rand(1000, 1000).cuda()
+              y = torch.rand(1000, 1000).cuda()
+              z = torch.matmul(x, y)
+              print("GPU computation successful!")
+        resources:
+          limits:
+            nvidia.com/gpu: "0.5"  # Request half a GPU
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+      restartPolicy: Never
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      nodeSelector:
+        gpu.nvidia.com/class: ampere
+  backoffLimit: 0

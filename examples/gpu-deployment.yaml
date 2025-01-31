@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpu-ml-workload
+  labels:
+    app: gpu-ml-workload
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: gpu-ml-workload
+  template:
+    metadata:
+      labels:
+        app: gpu-ml-workload
+    spec:
+      containers:
+      - name: ml-training
+        image: nvidia/cuda:11.6.2-base-ubuntu20.04
+        command: ["sleep"]
+        args: ["infinity"]
+        resources:
+          limits:
+            nvidia.com/gpu: "0.25" # Request 1/4 of a GPU through time-slicing
+        # Optional: specify architecture
+        # nodeSelector:
+        #   kubernetes.io/arch: amd64  # or arm64 for Graviton
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "all"
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: "all"
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
+---
+# Example of a pod that requires a full GPU
+apiVersion: v1
+kind: Pod
+metadata:
+  name: full-gpu-pod
+spec:
+  containers:
+  - name: gpu-container
+    image: nvidia/cuda:11.6.2-base-ubuntu20.04
+    command: ["sleep"]
+    args: ["infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: "1" # Request full GPU
+    env:
+    - name: NVIDIA_VISIBLE_DEVICES
+      value: "all"
+    - name: NVIDIA_DRIVER_CAPABILITIES
+      value: "all"
+  tolerations:
+  - key: "nvidia.com/gpu"
+    operator: "Exists"
+    effect: "NoSchedule"
+---
+# Example of a Graviton-specific GPU workload
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graviton-gpu-workload
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: graviton-gpu
+  template:
+    metadata:
+      labels:
+        app: graviton-gpu
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+      - name: gpu-arm
+        image: nvidia/cuda:11.6.2-base-ubuntu20.04
+        command: ["sleep"]
+        args: ["infinity"]
+        resources:
+          limits:
+            nvidia.com/gpu: "0.5" # Request half GPU
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "all"
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: "all"
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
